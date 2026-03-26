@@ -219,6 +219,11 @@
         // Cap ledSize to 2 for extremely tall grids to keep height < 8000px
         if (GRID_H > 800) ledSize = Math.min(ledSize, 2);
 
+        // Store for paintDiscs and other functions
+        canvas.dataset.ledSize = ledSize;
+        canvas.dataset.padX = padX;
+        canvas.dataset.padY = padY;
+
         canvas.width = GRID_W * ledSize * dpr;
         canvas.height = GRID_H * ledSize * dpr;
         canvas.style.width = (GRID_W * ledSize) + 'px';
