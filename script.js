@@ -893,32 +893,5 @@
     const btnPower = document.getElementById('btnPower');
     const btnReboot = document.getElementById('btnReboot');
 
-})();
-
-        clearBuffer(targetBuffer);
-        renderFixedLine_buf(targetBuffer, h + ':' + m + ':' + s, 0, [30, 180, 30], 'center');
-        snapToTarget();
-        await wait(600);
-
-        // ---- Stage 6: Ready — show quote ----
-        logBoot('Loading quotes...', 'log-info');
-        await wait(300);
-        logBoot(`  ${Object.keys(quotesMap).length} unique times loaded`, 'log-ok');
-        logBoot('Ready!', 'log-ok');
-
-        clearBuffer(targetBuffer);
-        snapToTarget();
-        await wait(200);
-
-        // Show the current time's quote with the sweep animation
-        currentTimeKey = '';
-        updateDisplay(true);
-        updateTimer = setInterval(() => updateDisplay(false), UPDATE_INTERVAL_MS);
-
-        // Restore button states
-        bootActive = false;
-        btnPower.textContent = '⏻ POWER OFF';
-        btnPower.disabled = false;
-        btnReboot.disabled = false;
     }
 })();
