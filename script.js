@@ -28,23 +28,25 @@
     const CELL_W = CHAR_W + CHAR_GAP_X;  // 6
     const CELL_H = CHAR_H + CHAR_GAP_Y;  // 8
 
-    // PRD: 30 chars/line × 6 total lines (3 quote + 2 attrib + 1 brand)
-    let COLS_CHARS = 30;
-    let QUOTE_LINES = 3;
-    let ATTRIB_LINES = 2;
-    let SPACER_PX = 0;
+    // HI-CAPACITY GRID CONFIG (Fixed for 191x1200)
+    // 191 cols / 6 pixels per char = 31 chars per line
+    // 1200 rows / 8 pixels per char = 150 lines total
+    let COLS_CHARS = 31;
+    let QUOTE_LINES = 140; // plenty of space for 4000+ chars
+    let ATTRIB_LINES = 6;
+    let SPACER_PX = 4;
 
     // Derived — recalculated via recalcLayout()
     let GRID_W, QUOTE_H, ATTRIB_Y, ATTRIB_H, BRAND_Y, BRAND_H, GRID_H;
 
     function recalcLayout() {
-        GRID_W = COLS_CHARS * CELL_W; // exactly 180
+        GRID_W = 191; // FIXED
         QUOTE_H = QUOTE_LINES * CELL_H;
         ATTRIB_Y = QUOTE_H;
         ATTRIB_H = ATTRIB_LINES * CELL_H;
         BRAND_Y = ATTRIB_Y + ATTRIB_H + SPACER_PX;
         BRAND_H = CELL_H;
-        GRID_H = BRAND_Y + BRAND_H; // exactly 48
+        GRID_H = 1200; // FIXED
     }
     recalcLayout();
 

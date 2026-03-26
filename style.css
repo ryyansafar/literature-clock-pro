@@ -22,7 +22,8 @@
 html,
 body {
     height: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     background: var(--bg-color);
     font-family: 'Space Mono', 'JetBrains Mono', monospace;
     color: #a0aec0;
