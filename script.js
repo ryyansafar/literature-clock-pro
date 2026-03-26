@@ -214,10 +214,11 @@
         // Scaling logic: for the hi-cap 191x1200 grid, we must be careful 
         // with total canvas pixels to avoid browser limits.
         const availW = maxW - (padX * 2);
-        let ledSize = Math.max(2, Math.floor(availW / GRID_W)); 
+        let ledSize = Math.max(1, Math.floor(availW / GRID_W)); 
         
-        // Cap ledSize to 2 for extremely tall grids to keep height < 8000px
-        if (GRID_H > 800) ledSize = Math.min(ledSize, 2);
+        // Cap ledSize to 2 for extremely tall grids to keep height < 12000px
+        // but ensure it fits width-wise on small mobile.
+        if (GRID_H > 800 && ledSize > 1) ledSize = Math.min(ledSize, 2);
 
         // Store for paintDiscs and other functions
         canvas.dataset.ledSize = ledSize;
