@@ -203,7 +203,8 @@
         '\u201D': [0b01010, 0b00101, 0b00000, 0b00000, 0b00000, 0b00000, 0b00000],
     };
 
-    // ---- Canvas resi    function resizeCanvas() {
+    // ---- Canvas resize ----
+    function resizeCanvas() {
         const dpr = window.devicePixelRatio || 1;
         const maxW = window.innerWidth;
         
@@ -227,7 +228,6 @@
         canvas.style.marginLeft = padX + 'px';
         canvas.style.marginTop = padY + 'px';
         canvas.style.marginBottom = '100px'; 
-100px'; // Space from system interface
 
         ctx.scale(dpr, dpr);
         paintDiscs();
