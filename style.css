@@ -46,8 +46,7 @@ body::before {
 
 canvas {
     display: block;
-    width: 100vw;
-    height: 100vh;
+    margin: 20px auto;
 }
 
 /* System Interface */

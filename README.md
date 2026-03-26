@@ -1,86 +1,85 @@
-# Literature Clock Hardware (Pro Edition)
+# Literature Clock — Flip Disc Simulator
 
-A cinematic, high-capacity flip-disc display controller and web simulator for literary quotes. This is a standalone, performance-optimized version for technical portfolios.
+A hardware simulation and design tool for a large-scale electromagnetic flip-disc clock that displays literary quotes tied to the current minute.
 
 **Repository:** [https://github.com/ryyansafar/literature-clock-pro](https://github.com/ryyansafar/literature-clock-pro)
 
-![Literature Clock Simulator](https://raw.githubusercontent.com/ryyansafar/literature-clock-hardware/main/docs/preview_placeholder.png)
-*(Note: Replace with actual GIF/Image of the hardware or simulator)*
+---
 
-## 📖 Overview
+## What This Is
 
-The **Literature Clock** is an immersive hardware installation and digital simulation. It uses a high-density grid of flip-discs to render literary quotes in real-time. This project includes both the ESP32-based firmware for physical hardware and a high-fidelity web-based simulator.
+The **Literature Clock** is a physical installation concept: a wall-mounted panel of electromagnetic flip-disc modules, each disc flipping between a white face and a dark face to render text. Every minute, a new literary quote containing the exact time is displayed — with the time portion highlighted in blue.
 
-### ✨ Features
-- **Genericized Branding**: All original company names removed for a clean, open-source template.
-- **High-Capacity Grid**: Hardcoded 191x1200 grid supporting quotes up to 5,000 characters.
-- **Cinematic Interface**: Premium glassmorphic hacker console with real-time status logging.
-- **Web Simulator**: High-fidelity mechanical simulation of electromagnetic flip discs.
-- **ESP32 Firmware**: Industrial-grade C++ logic for physical hardware integration.
-- **Dynamic Formatting**: Automatic word-wrapping and layout optimization for quotes and attributions.
+This repository contains:
+- **A web simulator** (`index.html`) that renders a high-fidelity canvas simulation of the flip-disc panel, sized precisely to show every entry in the dataset without truncation.
+- **ESP32 firmware** (`/esp32_firmware`) for driving the physical hardware.
+- **Hardware specifications** ([FLIP_DISC_SPEC.md](./FLIP_DISC_SPEC.md)) with panel size options, cost estimates, and layout analysis.
 
 ---
 
-## 🛠️ Hardware Specifications
+## Features
 
-The physical clock is designed to use a custom matrix of flip-disc modules.
-
-- **Grid Resolution**: 191 discs (Width) × 72 discs (Height)
-- **Total Discs**: 13,752
-- **Controller**: ESP32 (S3 or similar)
-- **Display Driver**: Custom SPI/PWM driver for flip-disc modules (e.g., Flip-disc module manufacturer 7mm discs).
-- **Layout Zones**:
-  - **Quote Area**: Centered 6-line block for the literary text.
-  - **Attribution**: Bottom-aligned author and book credit.
-  - **Brand Line**: "LITERATURE CLOCK" branding in the bottom-right corner.
-
-See [FLIP_DISC_SPEC.md](./FLIP_DISC_SPEC.md) for detailed hardware calculations and [HARDWARE_GUIDE.md](./esp32_firmware/HARDWARE_GUIDE.md) for wiring.
+- **Accurately sized grid** — the panel dimensions are derived from a full scan of the CSV dataset: the simulator fits the longest possible quote (24 wrapped lines at 31 chars/line) plus attribution and branding with no truncation.
+- **Responsive canvas** — scales to fill the browser window on any screen size, constrained by both width and height so the full panel is always visible.
+- **Flip animation** — each update triggers a left-to-right column sweep animating each disc from its current face to its target face, mimicking real electromagnetic actuation.
+- **5×7 bitmap font** — a full ASCII + typographic punctuation glyph set rendered directly in disc pixels.
+- **Cinematic boot console** — a glassmorphic terminal UI with power/reboot controls and live status logging.
+- **CSV dataset** — 3,626 literary quotes from classic and contemporary fiction, each mapped to a specific minute of the day.
 
 ---
 
-## 💻 Software Architecture
+## Simulator Grid
 
-### ESP32 Firmware (`/esp32_firmware`)
-The firmware handles time synchronization via NTP, SD card/LittleFS data management, and the high-speed rendering logic for the FastLED-compatible matrix.
-- **Time Sync**: Connects to WiFi and synchronizes with NTP servers.
-- **Data Handling**: Reads `litclock_annotated.csv` line-by-line using a fast lookup index.
-- **Graphics**: Custom font rendering and buffer management for the large grid.
-
-### Web Simulator (`/`)
-An interactive HTML5/JavaScript simulation that replicates the hardware behavior.
-- **Rendering**: Canvas-based disc rendering with simulated "flip" transitions.
-- **Physics**: Subtle disc jitter and lighting effects to mimic the physical look.
-- **Boot Sequence**: Includes a nostalgic terminal-style boot sequence.
+| Parameter | Value |
+|---|---|
+| Grid width | **191 discs** |
+| Grid height | **278 discs** |
+| Total discs simulated | **53,098** |
+| Font cell size | 6 × 8 discs (5×7 glyph + 1 gap each axis) |
+| Characters per line | **31** |
+| Quote lines (max) | 24 |
+| Attribution lines | 6 |
+| Brand line | 1 |
+| Physical equivalent | 152.8 cm × 222.4 cm @ 8mm pitch |
 
 ---
 
-## 🚀 Getting Started
+## Running the Simulator
 
-### Running the Simulator
 1. Clone this repository.
 2. Open `index.html` in any modern web browser.
-3. The simulator will automatically load the CSV data and begin displaying quotes based on your local time.
+   - The CSV is loaded via `fetch`, so you need a local server or a browser that allows local file access. From the project directory: `python3 -m http.server 8080` then open `http://localhost:8080`.
+3. The simulator loads the quote dataset and immediately displays the quote for the current minute.
+4. **Click** the canvas or press **Space / →** to cycle through alternate quotes for the same minute.
 
-### Deploying the Firmware
+---
+
+## Hardware
+
+The physical clock uses a matrix of electromagnetic flip-disc modules. See [FLIP_DISC_SPEC.md](./FLIP_DISC_SPEC.md) for:
+- Font and cell geometry
+- CSV quote analysis (line distribution, longest entries)
+- Panel size options with physical dimensions and cost estimates
+- Recommended configuration
+
+### ESP32 Firmware
+
 1. Open `esp32_firmware/esp32_firmware.ino` in the Arduino IDE.
-2. Install the necessary libraries: `FastLED`, `LittleFS`, `WiFi`.
-3. Configure your WiFi credentials in `config.h`.
+2. Install libraries: `FastLED`, `LittleFS`, `WiFi`.
+3. Configure WiFi credentials in `config.h`.
 4. Upload to your ESP32 board.
-5. Upload the `litclock_annotated.csv` to the LittleFS filesystem using the "ESP32 LittleFS Data Upload" tool.
+5. Upload `litclock_annotated.csv` to LittleFS using the "ESP32 LittleFS Data Upload" tool.
 
 ---
 
-## 🙏 Credits & Acknowledgments
+## Credits
 
-This project is a hardware-focused fork and extension of the original Literature Clock concepts.
-
-- **Concept & Dataset**: Inspired by the work of **Jaap Meijers** ([E-reader Literary Clock](https://www.instructables.com/id/Literary-Clock-Made-From-E-reader/)).
-- **Original Software Logic**: Based on the [JohannesNE/literature-clock](https://github.com/JohannesNE/literature-clock) repository.
-- **Hardware Integration**: Developed as a high-scale flip-disc implementation of the literary clock concept.
-- **Quotes Cache**: The dataset is derived from various open-source contributions to the original Literature Clock project.
+- **Concept & dataset**: Inspired by [Jaap Meijers' E-reader Literary Clock](https://www.instructables.com/id/Literary-Clock-Made-From-E-reader/).
+- **Quote data**: Derived from [JohannesNE/literature-clock](https://github.com/JohannesNE/literature-clock).
+- **Hardware implementation**: Developed as a large-scale flip-disc adaptation of the literary clock concept.
 
 ---
 
-## ⚖️ License
+## License
 
-See [LICENCE.md](./literature-clock-hardware/LICENCE.md) for license details.
+See [LICENCE.md](./literature-clock-hardware/LICENCE.md).

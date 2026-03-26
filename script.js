@@ -44,12 +44,12 @@
     const CELL_W = CHAR_W + CHAR_GAP_X;  // 6
     const CELL_H = CHAR_H + CHAR_GAP_Y;  // 8
 
-    // HI-CAPACITY GRID CONFIG (Fixed for 191x1200)
+    // GRID CONFIG — sized to fit the longest entry in the CSV
     // 191 cols / 6 pixels per char = 31 chars per line
-    // 1200 rows / 8 pixels per char = 150 lines total
+    // Longest quote wraps to 24 lines; longest attribution wraps to 4 lines
     let COLS_CHARS = 31;
-    let QUOTE_LINES = 150; // Extra room for safe margins
-    let ATTRIB_LINES = 6;
+    let QUOTE_LINES = 24; // Max lines any quote needs at 31 chars/line
+    let ATTRIB_LINES = 6; // 6 allocated; max attribution needs 4
     let SPACER_PX = 10;
 
     // Derived — recalculated via recalcLayout()
@@ -62,7 +62,7 @@
         ATTRIB_H = ATTRIB_LINES * CELL_H;
         BRAND_Y = ATTRIB_Y + ATTRIB_H + SPACER_PX;
         BRAND_H = CELL_H;
-        GRID_H = BRAND_Y + BRAND_H + 20; // 1200+ pixels total
+        GRID_H = BRAND_Y + BRAND_H + 20; // 278 disc rows total
     }
     recalcLayout();
 
@@ -204,36 +204,42 @@
     };
 
     // ---- Canvas resize ----
+    // Padding inside the canvas around the disc grid (for dimension annotations).
+    const ANNO_L = 40;  // left: space for rotated height label
+    const ANNO_T = 20;  // top: breathing room
+    const ANNO_B = 44;  // bottom: space for width dimension label + text
+    const ANNO_R = 20;  // right: breathing room
+
     function resizeCanvas() {
         const dpr = window.devicePixelRatio || 1;
-        const maxW = window.innerWidth;
-        
-        const padX = Math.max(20, Math.ceil(maxW * 0.05));
-        const padY = 40; 
 
-        // Scaling logic: for the hi-cap 191x1200 grid, we must be careful 
-        // with total canvas pixels to avoid browser limits.
-        const availW = maxW - (padX * 2);
-        let ledSize = Math.max(1, Math.floor(availW / GRID_W)); 
-        
-        // Cap ledSize to 2 for extremely tall grids to keep height < 12000px
-        // but ensure it fits width-wise on small mobile.
-        if (GRID_H > 800 && ledSize > 1) ledSize = Math.min(ledSize, 2);
+        // Reserve space for the fixed console panel at the bottom (~185px)
+        // and annotation areas so the grid is fully visible.
+        const CONSOLE_H = 185;
+        const availW = window.innerWidth  - ANNO_L - ANNO_R;
+        const availH = window.innerHeight - CONSOLE_H - ANNO_T - ANNO_B;
 
-        // Store for paintDiscs and other functions
+        // ledSize constrained by both width and height so the whole grid is visible.
+        const ledSize = Math.max(1, Math.min(
+            Math.floor(availW / GRID_W),
+            Math.floor(Math.max(availH, GRID_H) / GRID_H)
+        ));
+
+        // Canvas buffer includes annotation padding on all sides.
+        const canvasW = ANNO_L + GRID_W * ledSize + ANNO_R;
+        const canvasH = ANNO_T + GRID_H * ledSize + ANNO_B;
+
         canvas.dataset.ledSize = ledSize;
-        canvas.dataset.padX = padX;
-        canvas.dataset.padY = padY;
+        canvas.dataset.padX    = ANNO_L;
+        canvas.dataset.padY    = ANNO_T;
 
-        canvas.width = GRID_W * ledSize * dpr;
-        canvas.height = GRID_H * ledSize * dpr;
-        canvas.style.width = (GRID_W * ledSize) + 'px';
-        canvas.style.height = (GRID_H * ledSize) + 'px';
-        
-        // Center the canvas horizontally via style
-        canvas.style.marginLeft = padX + 'px';
-        canvas.style.marginTop = padY + 'px';
-        canvas.style.marginBottom = '100px'; 
+        canvas.width  = canvasW * dpr;
+        canvas.height = canvasH * dpr;
+        canvas.style.width  = canvasW + 'px';
+        canvas.style.height = canvasH + 'px';
+
+        // Let CSS handle centering; no JS margin tricks.
+        canvas.style.margin = '20px auto';
 
         ctx.scale(dpr, dpr);
         paintDiscs();
@@ -811,7 +817,7 @@
     snapToTarget();
 
     loadCSV().then(() => {
-        logBoot('System Core // HI_CAPACITY_GRID Online', 'log-ok');
+        logBoot('System Core // Literature Clock Online', 'log-ok');
         logBoot('Ready!', 'log-brand');
         
         updateTimer = setInterval(() => updateDisplay(false), UPDATE_INTERVAL_MS);
@@ -872,7 +878,7 @@
         logBoot('Initializing System Core...', 'log-info');
         await wait(800);
         
-        logBoot('Allocating 245,626 Disc Buffers...', 'log-info');
+        logBoot('Allocating 53,098 Disc Buffers...', 'log-info');
         rebuildBuffers();
         resizeCanvas();
         await wait(600);
