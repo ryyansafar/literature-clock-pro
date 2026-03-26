@@ -1,18 +1,22 @@
-# Literature Clock Hardware
+# Literature Clock Hardware (Pro Edition)
 
-A massive literary flip-disc clock that tells the time using thousands of quotes from world literature. Each minute, the display updates with a new quote where the current time is mentioned.
+A cinematic, high-capacity flip-disc display controller and web simulator for literary quotes. This is a standalone, performance-optimized version for technical portfolios.
 
-![Literature Clock Simulator](https://raw.githubusercontent.com/ryyansafar/literature-clock-hardware/main/docs/preview_placeholder.png) 
+**Repository:** [https://github.com/ryyansafar/literature-clock-pro](https://github.com/ryyansafar/literature-clock-pro)
+
+![Literature Clock Simulator](https://raw.githubusercontent.com/ryyansafar/literature-clock-hardware/main/docs/preview_placeholder.png)
 *(Note: Replace with actual GIF/Image of the hardware or simulator)*
 
 ## 📖 Overview
 
 The **Literature Clock** is an immersive hardware installation and digital simulation. It uses a high-density grid of flip-discs to render literary quotes in real-time. This project includes both the ESP32-based firmware for physical hardware and a high-fidelity web-based simulator.
 
-### Features
-- **3,600+ Literary Quotes**: A comprehensive dataset covering every minute of the day.
-- **High-Fidelity Simulator**: A browser-based interactive simulation of the flip-disc display with realistic physics, disc-flip animations, and sound.
-- **Embedded Firmware**: Optimized Arduino/C++ code for ESP32 to drive a large-scale flip-disc array (191×72).
+### ✨ Features
+- **Genericized Branding**: All original company names removed for a clean, open-source template.
+- **High-Capacity Grid**: Hardcoded 191x1200 grid supporting quotes up to 5,000 characters.
+- **Cinematic Interface**: Premium glassmorphic hacker console with real-time status logging.
+- **Web Simulator**: High-fidelity mechanical simulation of electromagnetic flip discs.
+- **ESP32 Firmware**: Industrial-grade C++ logic for physical hardware integration.
 - **Dynamic Formatting**: Automatic word-wrapping and layout optimization for quotes and attributions.
 
 ---
