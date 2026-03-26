@@ -803,13 +803,19 @@
     rebuildBuffers(); // Ensure arrays are sized to final GRID_W/H
     resizeCanvas();
     updateDimReadout();
+    
     clearBuffer(targetBuffer);
-    renderFixedLine_buf(targetBuffer, 'LOADING...', 0, COLOR_BLUE, 'left');
+    renderFixedLine_buf(targetBuffer, 'LOADING SYSTEM...', 0, COLOR_BLUE, 'left');
     renderFixedLine_buf(targetBuffer, 'LITERATURE CLOCK', BRAND_Y, COLOR_BRAND, 'right');
     snapToTarget();
+
     loadCSV().then(() => {
+        logBoot('System Core // HI_CAPACITY_GRID Online', 'log-ok');
+        logBoot('Ready!', 'log-brand');
+        
         updateTimer = setInterval(() => updateDisplay(false), UPDATE_INTERVAL_MS);
-        // Deferred re-render to ensure correct canvas sizing after page settles
+        
+        // Final layout settle
         requestAnimationFrame(() => {
             resizeCanvas();
             if (quotesLoaded && quotesMap[currentTimeKey]) {
@@ -819,131 +825,40 @@
     });
 
     // ==================================================================
-    // Debug Panel — Power Control & Boot Sequence
+    // System Controls (Hacker Console)
     // ==================================================================
-    const bootLog = document.getElementById('bootLog');
-    const btnPower = document.getElementById('btnPower');
-    const btnReboot = document.getElementById('btnReboot');
-
-    function logBoot(text, cls) {
-        const span = document.createElement('span');
-        span.className = cls || '';
-        span.textContent = text + '\n';
-        bootLog.appendChild(span);
-        bootLog.scrollTop = bootLog.scrollHeight;
-    }
-
-    function clearLog() {
-        bootLog.innerHTML = '';
-    }
-
-    /**
-     * Turn LEDs off (simulate power cut) or back on (triggers boot).
-     */
     window.togglePower = function () {
         if (bootActive) return;
-
         if (powerOn) {
-            // --- POWER OFF ---
             powerOn = false;
             if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
             animating = false;
             if (updateTimer) { clearInterval(updateTimer); updateTimer = null; }
             currentTimeKey = '';
-
-            // All LEDs off
             clearBuffer(targetBuffer);
             snapToTarget();
-
             btnPower.textContent = '⏻ POWER ON';
             btnPower.classList.add('power-off');
             btnReboot.disabled = true;
-            clearLog();
-            logBoot('[POWER OFF]', 'log-warn');
+            logBoot('[SYSTEM_HALT] Power Disconnected', 'log-warn');
         } else {
-            // --- POWER ON → Boot Sequence ---
             runBootSequence();
         }
     };
 
     window.rebootSequence = function () {
         if (bootActive) return;
-        // Simulate a reboot: blank LEDs, then boot
         powerOn = false;
         if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
         animating = false;
         if (updateTimer) { clearInterval(updateTimer); updateTimer = null; }
         currentTimeKey = '';
-
         clearBuffer(targetBuffer);
         snapToTarget();
-
-        clearLog();
-        logBoot('[REBOOT]', 'log-warn');
-
+        logBoot('[REBOOTING]', 'log-warn');
         setTimeout(() => runBootSequence(), 600);
     };
 
-    /**
-     * Update grid from LED column/row counts.
-     * Auto-derives COLS_CHARS and QUOTE_LINES — user only needs to think in LEDs.
-     */
-    let _gridDebounce = null;
-
-    window.updateGridDimensions = function () {
-        const cols = parseInt(document.getElementById('inputCols').value);
-        const rows = parseInt(document.getElementById('inputRows').value);
-        if (!cols || cols < 6 || !rows || rows < 10) {
-            // Still update the readout with what they've typed so far
-            const w = document.getElementById('dimWidth');
-            const h = document.getElementById('dimHeight');
-            const l = document.getElementById('dimLEDs');
-            const d = document.getElementById('dimDerived');
-            if (w) w.textContent = cols ? (cols * DISC_PITCH_MM).toFixed(0) : '—';
-            if (h) h.textContent = rows ? (rows * DISC_PITCH_MM).toFixed(0) : '—';
-            if (l) l.textContent = (cols && rows) ? (cols * rows).toLocaleString() : '—';
-            if (d) d.textContent = '(need at least 6 cols, 10 rows)';
-            return;
-        }
-
-        // Derive COLS_CHARS: how many 6-px-wide chars fit in these columns
-        COLS_CHARS = Math.max(1, Math.floor((cols + CHAR_GAP_X) / CELL_W));
-
-        // Derive QUOTE_LINES: what's left after attribution + spacer + brand
-        const fixedRows = ATTRIB_LINES * CELL_H + SPACER_PX + CHAR_H + CHAR_GAP_Y;
-        QUOTE_LINES = Math.max(1, Math.floor((rows - fixedRows + CHAR_GAP_Y) / CELL_H));
-
-        recalcLayout();
-
-        // Instant readout update (mm, counts, derived values)
-        updateDimReadout();
-
-        // Debounce the heavy grid rebuild (300ms after user stops typing)
-        clearTimeout(_gridDebounce);
-        _gridDebounce = setTimeout(() => applyGridChange(), 300);
-    };
-
-    function applyGridChange() {
-        if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
-        animating = false;
-
-        recalcLayout();
-        rebuildBuffers();
-        resizeCanvas();
-        updateDimReadout();
-
-        currentTimeKey = ''; // force refresh
-        if (quotesLoaded) {
-            updateDisplay(true);
-        } else {
-            clearBuffer(targetBuffer);
-            snapToTarget();
-        }
-    }
-
-    /**
-     * Simulate the full ESP32 + WS2812B boot sequence on the LED grid.
-     */
     async function runBootSequence() {
         bootActive = true;
         powerOn = true;
@@ -951,87 +866,34 @@
         btnPower.classList.remove('power-off');
         btnPower.disabled = true;
         btnReboot.disabled = true;
-        clearLog();
 
         const wait = (ms) => new Promise(r => setTimeout(r, ms));
-
-        // ---- Stage 1: ESP32 power on ----
-        logBoot('=== Literature Clock v1.0 ===', 'log-brand');
-        logBoot('ESP32 initializing...', 'log-info');
-        await wait(400);
-
-        // All LEDs flash briefly (WS2812B power-on flash)
-        for (let i = 0; i < totalLEDs; i++) targetBuffer[i] = [15, 15, 12];
-        snapToTarget();
-        logBoot('WS2812B strip detected', 'log-info');
-        logBoot(`  ${totalLEDs} LEDs on GPIO16`, 'log-info');
-        await wait(300);
-
-        clearBuffer(targetBuffer);
-        snapToTarget();
-        await wait(200);
-
-        // ---- Stage 2: LITERATURE CLOCK splash (brand screen) ----
-        logBoot('Rendering splash screen...', 'log-info');
-        clearBuffer(targetBuffer);
-
-        // Show LITERATURE CLOCK large and centered (uses 2 lines for emphasis)
-        const brandText = 'LITERATURE CLOCK';
-        const brandColor = [50, 100, 160];
-        // Render centered in the middle of the grid
-        const midY = Math.floor((GRID_H - CHAR_H) / 2);
-        renderFixedLine_buf(targetBuffer, brandText, midY, brandColor, 'center');
-        snapToTarget();
-        await wait(1800);
-
-        // Boot animation fade out is removed for flip discs (they are binary)
-        clearBuffer(targetBuffer);
-        snapToTarget();
-        await wait(300);
-
-        // ---- Stage 3: Mount filesystem ----
-        logBoot('Mounting LittleFS...', 'log-info');
-        await wait(350);
-        logBoot('  LittleFS mounted', 'log-ok');
-        logBoot('  CSV file found (2.1 MB)', 'log-ok');
-
-        clearBuffer(targetBuffer);
-        renderFixedLine_buf(targetBuffer, 'FS OK', 0, [30, 80, 30], 'left');
-        snapToTarget();
-        await wait(400);
-
-        // ---- Stage 4: WiFi Connect ----
-        logBoot('Connecting to WiFi...', 'log-info');
-        clearBuffer(targetBuffer);
-        renderFixedLine_buf(targetBuffer, 'WIFI', 0, COLOR_BLUE, 'left');
-        snapToTarget();
-
-        // Dot animation for WiFi
-        for (let dots = 1; dots <= 6; dots++) {
-            await wait(300);
-            logBoot('  ' + '.'.repeat(dots), '');
-            clearBuffer(targetBuffer);
-            renderFixedLine_buf(targetBuffer, 'WIFI' + '.'.repeat(dots), 0, COLOR_BLUE, 'left');
-            snapToTarget();
-        }
-        logBoot('  Connected! IP: 192.168.1.42', 'log-ok');
-        clearBuffer(targetBuffer);
-        renderFixedLine_buf(targetBuffer, 'WIFI OK', 0, [30, 120, 30], 'left');
-        snapToTarget();
-        await wait(500);
-
-        // ---- Stage 5: NTP Time Sync ----
-        logBoot('Syncing NTP time...', 'log-info');
-        clearBuffer(targetBuffer);
-        renderFixedLine_buf(targetBuffer, 'NTP SYNC', 0, COLOR_BLUE, 'left');
-        snapToTarget();
+        logBoot('Initializing System Core...', 'log-info');
         await wait(800);
+        
+        logBoot('Allocating 245,626 Disc Buffers...', 'log-info');
+        rebuildBuffers();
+        resizeCanvas();
+        await wait(600);
+        
+        logBoot('Connecting to Neural Quote Mesh...', 'log-info');
+        await loadCSV();
+        
+        logBoot('Status: ONLINE', 'log-ok');
+        logBoot('Ready!', 'log-brand');
+        
+        btnPower.textContent = '⏻ SYSTEM_OFF';
+        btnPower.disabled = false;
+        btnReboot.disabled = false;
+        bootActive = false;
+        
+        updateTimer = setInterval(() => updateDisplay(false), UPDATE_INTERVAL_MS);
+    }
 
-        const now = new Date();
-        const h = String(now.getHours()).padStart(2, '0');
-        const m = String(now.getMinutes()).padStart(2, '0');
-        const s = String(now.getSeconds()).padStart(2, '0');
-        logBoot(`  Time synced: ${h}:${m}:${s}`, 'log-ok');
+    const btnPower = document.getElementById('btnPower');
+    const btnReboot = document.getElementById('btnReboot');
+
+})();
 
         clearBuffer(targetBuffer);
         renderFixedLine_buf(targetBuffer, h + ':' + m + ':' + s, 0, [30, 180, 30], 'center');
