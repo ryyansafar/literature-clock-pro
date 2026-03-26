@@ -893,5 +893,4 @@
     const btnPower = document.getElementById('btnPower');
     const btnReboot = document.getElementById('btnReboot');
 
-    }
 })();
