@@ -203,22 +203,19 @@
         '\u201D': [0b01010, 0b00101, 0b00000, 0b00000, 0b00000, 0b00000, 0b00000],
     };
 
-    // ---- Canvas resize ----
-    function resizeCanvas() {
+    // ---- Canvas resi    function resizeCanvas() {
         const dpr = window.devicePixelRatio || 1;
-        
-        // Horizontal scaling based on viewport
         const maxW = window.innerWidth;
-        const padFraction = 0.05;
-        const availW = maxW * (1 - padFraction * 2);
         
-        // Fixed disc size for readability in vertical scroll mode
+        const padX = Math.max(20, Math.ceil(maxW * 0.05));
+        const padY = 40; 
+
         // Scaling logic: for the hi-cap 191x1200 grid, we must be careful 
         // with total canvas pixels to avoid browser limits.
         const availW = maxW - (padX * 2);
         let ledSize = Math.max(2, Math.floor(availW / GRID_W)); 
         
-        // Cap ledSize to 2 for extremely tall grids to keep height < 6000px
+        // Cap ledSize to 2 for extremely tall grids to keep height < 8000px
         if (GRID_H > 800) ledSize = Math.min(ledSize, 2);
 
         canvas.width = GRID_W * ledSize * dpr;
@@ -229,7 +226,8 @@
         // Center the canvas horizontally via style
         canvas.style.marginLeft = padX + 'px';
         canvas.style.marginTop = padY + 'px';
-        canvas.style.marginBottom = '100px'; // Space from system interface
+        canvas.style.marginBottom = '100px'; 
+100px'; // Space from system interface
 
         ctx.scale(dpr, dpr);
         paintDiscs();
