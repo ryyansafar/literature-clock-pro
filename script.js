@@ -15,7 +15,7 @@
 (function () {
     'use strict';
 
-    // ---- Error Logging ----
+    // ---- Boot Log (populates the console UI panel) ----
     const bootLogArea = document.getElementById('bootLog');
     function logBoot(text, cls) {
         if (!bootLogArea) return;
@@ -25,11 +25,6 @@
         bootLogArea.appendChild(span);
         bootLogArea.scrollTop = bootLogArea.scrollHeight;
     }
-
-    window.onerror = function(msg, url, line) {
-        logBoot(`[SYS_ERR] ${msg} at line ${line}`, 'log-warn');
-        return false;
-    };
 
     // ---- Config ----
     const CSV_PATH = 'literature-clock-hardware/litclock_annotated.csv';
@@ -682,7 +677,7 @@
             quotesLoaded = true;
             updateDisplay(true);
         } catch (err) {
-            console.error('CSV load error:', err);
+            logBoot('Error loading quote data. Serve via HTTP, not file://.', 'log-warn');
             clearBuffer(targetBuffer);
             renderFixedLine_buf(targetBuffer, 'ERROR LOADING CSV', 0, [255, 0, 0], 'left');
             renderFixedLine_buf(targetBuffer, 'LITERATURE CLOCK', BRAND_Y, COLOR_BRAND, 'right');
@@ -706,7 +701,6 @@
                 title: title.trim(), author: authorName ? authorName.trim() : 'Unknown',
             });
         }
-        console.log(`Loaded ${Object.keys(quotesMap).length} unique times.`);
     }
 
     function splitLine(line) {
