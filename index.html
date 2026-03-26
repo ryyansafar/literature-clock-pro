@@ -11,189 +11,42 @@
 <body>
     <canvas id="ledMatrix"></canvas>
 
-    <!-- Debug Panel -->
-    <div id="debugPanel">
-        <div id="debugToggle" onclick="document.getElementById('debugPanel').classList.toggle('collapsed')">⚙ DEBUG
+    <!-- System Interface: Cinematic Hacker Console -->
+    <div id="systemInterface">
+        <div id="consoleHeader">
+            <div class="status-indicator"></div>
+            <span class="system-title">SYSTEM_CORE // LITERATURE_CLOCK_V2</span>
+            <div class="system-actions">
+                <button id="btnPower" class="action-btn power" onclick="window.togglePower()">
+                    <span class="btn-icon">⏻</span> SYSTEM_OFF
+                </button>
+                <button id="btnReboot" class="action-btn reboot" onclick="window.rebootSequence()" disabled>
+                    <span class="btn-icon">↻</span> REBOOT_CLK
+                </button>
+            </div>
         </div>
-        <div id="debugControls">
-            <button id="btnPower" onclick="window.togglePower()">⏻ POWER OFF</button>
-            <button id="btnReboot" onclick="window.rebootSequence()" disabled>↻ REBOOT</button>
-
-            <div class="debug-section">GRID DIMENSIONS</div>
-            <div class="debug-row">
-                <label>Columns (Discs)</label>
-                <input type="number" id="inputCols" value="180" oninput="window.updateGridDimensions()">
+        
+        <div id="consoleBody">
+            <div class="log-container">
+                <div id="bootLog"></div>
             </div>
-            <div class="debug-row">
-                <label>Rows (Discs)</label>
-                <input type="number" id="inputRows" value="48" oninput="window.updateGridDimensions()">
+            
+            <div class="controls-panel">
+                <div class="control-group">
+                    <span class="ctrl-label">GRID_COLS</span>
+                    <input type="number" id="inputCols" value="180" oninput="window.updateGridDimensions()">
+                </div>
+                <div class="control-group">
+                    <span class="ctrl-label">GRID_ROWS</span>
+                    <input type="number" id="inputRows" value="48" oninput="window.updateGridDimensions()">
+                </div>
+                <div id="dimReadout">
+                    <div id="dimLEDs" class="dim-stat">—</div>
+                    <div class="dim-label">DISCS_TOTAL</div>
+                </div>
             </div>
-            <div id="dimReadout">
-                <span id="dimWidth">—</span> × <span id="dimHeight">—</span> mm<br>
-                <span id="dimLEDs">—</span> discs total<br>
-                <span id="dimDerived">—</span>
-            </div>
-
-            <div id="bootLog"></div>
         </div>
     </div>
-
-    <style>
-        #debugPanel {
-            position: fixed;
-            top: 12px;
-            right: 12px;
-            background: rgba(15, 15, 20, 0.92);
-            border: 1px solid rgba(60, 80, 120, 0.4);
-            border-radius: 8px;
-            font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
-            font-size: 11px;
-            color: #8899aa;
-            z-index: 100;
-            backdrop-filter: blur(8px);
-            overflow: hidden;
-            min-width: 220px;
-        }
-
-        #debugToggle {
-            padding: 6px 12px;
-            cursor: pointer;
-            user-select: none;
-            font-weight: 600;
-            letter-spacing: 1px;
-            color: #667788;
-            border-bottom: 1px solid rgba(60, 80, 120, 0.3);
-        }
-
-        #debugToggle:hover {
-            color: #99aabb;
-        }
-
-        #debugPanel.collapsed #debugControls {
-            display: none;
-        }
-
-        #debugPanel.collapsed {
-            min-width: auto;
-        }
-
-        #debugControls {
-            padding: 8px 12px 10px;
-        }
-
-        #debugControls button {
-            display: block;
-            width: 100%;
-            margin: 4px 0;
-            padding: 6px 10px;
-            background: rgba(30, 40, 55, 0.8);
-            border: 1px solid rgba(70, 90, 130, 0.4);
-            border-radius: 4px;
-            color: #aabbcc;
-            font-family: inherit;
-            font-size: 11px;
-            cursor: pointer;
-            text-align: left;
-            letter-spacing: 0.5px;
-        }
-
-        #debugControls button:hover:not(:disabled) {
-            background: rgba(40, 55, 75, 0.9);
-            border-color: rgba(90, 120, 170, 0.5);
-            color: #ccddee;
-        }
-
-        #debugControls button:disabled {
-            opacity: 0.35;
-            cursor: default;
-        }
-
-        #debugControls button.power-off {
-            border-color: rgba(180, 60, 60, 0.5);
-            color: #cc7777;
-        }
-
-        #bootLog {
-            margin-top: 8px;
-            padding: 6px 8px;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 4px;
-            max-height: 180px;
-            overflow-y: auto;
-            font-size: 10px;
-            line-height: 1.5;
-            color: #557766;
-            white-space: pre-wrap;
-            min-height: 20px;
-        }
-
-        #bootLog .log-ok {
-            color: #55aa77;
-        }
-
-        #bootLog .log-info {
-            color: #5588aa;
-        }
-
-        #bootLog .log-warn {
-            color: #aa8855;
-        }
-
-        #bootLog .log-brand {
-            color: #4477aa;
-            font-weight: bold;
-        }
-
-        .debug-section {
-            margin-top: 10px;
-            padding: 4px 0 3px;
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            color: #556677;
-            border-top: 1px solid rgba(60, 80, 120, 0.25);
-        }
-
-        .debug-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 3px 0;
-        }
-
-        .debug-row label {
-            font-size: 10px;
-            color: #778899;
-        }
-
-        .debug-row input[type="number"] {
-            width: 60px;
-            padding: 3px 5px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(60, 80, 120, 0.35);
-            border-radius: 3px;
-            color: #aabbcc;
-            font-family: inherit;
-            font-size: 11px;
-            text-align: right;
-        }
-
-        .debug-row input[type="number"]:focus {
-            outline: none;
-            border-color: rgba(90, 130, 200, 0.6);
-        }
-
-        #dimReadout {
-            margin-top: 6px;
-            padding: 5px 8px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 3px;
-            font-size: 10px;
-            line-height: 1.6;
-            color: #66aa88;
-            text-align: center;
-        }
-    </style>
 
     <script src="script.js"></script>
 </body>
