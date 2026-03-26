@@ -5,7 +5,7 @@
  * Text transitions use a column-sweep animation that mimics the cascade
  * of electromagnetic flip discs actuating in sequence.
  *
- * Layout:
+ *Layout:
  *   Quote area : Literary quote (variable lines, vertically centered)
  *   Attribution: "— Author, Book Title" (2 lines, word-wrapped)
  *   [spacer]
@@ -14,6 +14,22 @@
 
 (function () {
     'use strict';
+
+    // ---- Error Logging ----
+    const bootLogArea = document.getElementById('bootLog');
+    function logBoot(text, cls) {
+        if (!bootLogArea) return;
+        const span = document.createElement('span');
+        span.className = cls || '';
+        span.textContent = text + '\n';
+        bootLogArea.appendChild(span);
+        bootLogArea.scrollTop = bootLogArea.scrollHeight;
+    }
+
+    window.onerror = function(msg, url, line) {
+        logBoot(`[SYS_ERR] ${msg} at line ${line}`, 'log-warn');
+        return false;
+    };
 
     // ---- Config ----
     const CSV_PATH = 'literature-clock-hardware/litclock_annotated.csv';
@@ -197,11 +213,13 @@
         const availW = maxW * (1 - padFraction * 2);
         
         // Fixed disc size for readability in vertical scroll mode
-        // 191 discs wide should fit reasonably on most screens
-        const ledSize = Math.max(3, Math.floor(availW / GRID_W)); 
-
-        const padX = Math.max(20, Math.ceil((maxW - ledSize * GRID_W) / 2));
-        const padY = 40; // Top margin
+        // Scaling logic: for the hi-cap 191x1200 grid, we must be careful 
+        // with total canvas pixels to avoid browser limits.
+        const availW = maxW - (padX * 2);
+        let ledSize = Math.max(2, Math.floor(availW / GRID_W)); 
+        
+        // Cap ledSize to 2 for extremely tall grids to keep height < 6000px
+        if (GRID_H > 800) ledSize = Math.min(ledSize, 2);
 
         canvas.width = GRID_W * ledSize * dpr;
         canvas.height = GRID_H * ledSize * dpr;
@@ -779,6 +797,7 @@
         }
     });
 
+    rebuildBuffers(); // Ensure arrays are sized to final GRID_W/H
     resizeCanvas();
     updateDimReadout();
     clearBuffer(targetBuffer);
