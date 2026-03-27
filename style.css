@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap');
-
 *,
 *::before,
 *::after {
@@ -8,36 +6,22 @@
     box-sizing: border-box;
 }
 
-:root {
-    --bg-color: #050505;
-    --acc-cyan: #00f2ff;
-    --acc-amber: #ffb400;
-    --acc-blue: #0072ff;
-    --acc-red: #ff3e3e;
-    --glass-bg: rgba(14, 18, 26, 0.85);
-    --glass-border: rgba(0, 242, 255, 0.2);
-    --glass-glow: 0 8px 32px 0 rgba(0, 0, 0, 0.8), 0 0 1px 1px rgba(0, 242, 255, 0.1);
-}
-
 html,
 body {
     height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-    background: var(--bg-color);
-    font-family: 'Space Mono', 'JetBrains Mono', monospace;
-    color: #a0aec0;
+    background: #050505;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: auto;
 }
 
-/* Background Gradients */
+/* Subtle background glow */
 body::before {
     content: '';
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: 
+    inset: 0;
+    background:
         radial-gradient(circle at 80% 20%, rgba(0, 114, 255, 0.08) 0%, transparent 40%),
         radial-gradient(circle at 20% 80%, rgba(0, 242, 255, 0.05) 0%, transparent 40%);
     pointer-events: none;
@@ -46,267 +30,4 @@ body::before {
 
 canvas {
     display: block;
-    margin: 20px auto;
-}
-
-/* System Interface */
-#systemInterface {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 1000px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    box-shadow: var(--glass-glow);
-    z-index: 100;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    animation: entranceFade 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    transition: width 0.3s ease, bottom 0.3s ease;
-}
-
-@keyframes entranceFade {
-    from { opacity: 0; transform: translate(-50%, 20px); }
-    to { opacity: 1; transform: translate(-50%, 0); }
-}
-
-#consoleHeader {
-    display: flex;
-    align-items: center;
-    padding: 12px 20px;
-    background: rgba(0, 0, 0, 0.3);
-    border-bottom: 1px solid rgba(0, 242, 255, 0.1);
-}
-
-.status-indicator {
-    width: 8px;
-    height: 8px;
-    background: var(--acc-cyan);
-    border-radius: 50%;
-    margin-right: 12px;
-    box-shadow: 0 0 8px var(--acc-cyan);
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
-}
-
-.system-title {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: var(--acc-cyan);
-    flex-grow: 1;
-}
-
-.system-actions {
-    display: flex;
-    gap: 12px;
-}
-
-.action-btn {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #cbd5e0;
-    font-family: inherit;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 6px 14px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-}
-
-.action-btn:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #fff;
-    transform: translateY(-1px);
-}
-
-.action-btn.power { border-color: rgba(255, 62, 62, 0.3); color: var(--acc-red); }
-.action-btn.power:hover:not(:disabled) { background: rgba(255, 62, 62, 0.1); border-color: var(--acc-red); }
-
-.action-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
-#consoleBody {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    height: 120px;
-}
-
-.log-container {
-    padding: 12px 20px;
-    background: rgba(0, 0, 0, 0.2);
-    border-right: 1px solid rgba(0, 242, 255, 0.1);
-}
-
-#bootLog {
-    height: 100%;
-    overflow-y: auto;
-    font-size: 10px;
-    line-height: 1.6;
-    color: #718096;
-    white-space: pre-wrap;
-    scrollbar-width: thin;
-    scrollbar-color: var(--acc-cyan) transparent;
-}
-
-#bootLog::-webkit-scrollbar { width: 4px; }
-#bootLog::-webkit-scrollbar-thumb { background: var(--acc-cyan); border-radius: 2px; }
-
-.controls-panel {
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 12px;
-}
-
-.control-group {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.ctrl-label {
-    font-size: 10px;
-    font-weight: 700;
-    color: #4a5568;
-    letter-spacing: 1px;
-}
-
-.control-group input {
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(0, 242, 255, 0.2);
-    border-radius: 4px;
-    color: var(--acc-cyan);
-    font-family: inherit;
-    font-size: 12px;
-    padding: 4px 8px;
-    width: 70px;
-    text-align: right;
-}
-
-#dimReadout {
-    margin-top: 8px;
-    text-align: right;
-}
-
-.dim-stat {
-    font-size: 18px;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1;
-}
-
-.dim-label {
-    font-size: 9px;
-    letter-spacing: 1px;
-    color: #4a5568;
-    margin-top: 4px;
-}
-
-/* Log Colors */
-.log-ok { color: #48bb78; }
-.log-info { color: #4299e1; }
-.log-warn { color: #ed8936; }
-.log-brand { color: var(--acc-cyan); text-shadow: 0 0 10px var(--acc-cyan); }
-
-/* --- Responsive Media Queries --- */
-
-@media (max-width: 768px) {
-    #systemInterface {
-        width: calc(100% - 32px);
-        bottom: 16px;
-        max-width: none;
-    }
-
-    #consoleHeader {
-        padding: 10px 16px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
-    .system-title {
-        font-size: 10px;
-    }
-
-    .system-actions {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .action-btn {
-        flex: 1;
-        justify-content: center;
-        padding: 8px 12px;
-        font-size: 9px;
-    }
-
-    #consoleBody {
-        grid-template-columns: 1fr;
-        height: auto;
-        min-height: 180px;
-    }
-
-    .log-container {
-        height: 100px;
-        border-right: none;
-        border-bottom: 1px solid rgba(0, 242, 255, 0.1);
-    }
-
-    .controls-panel {
-        padding: 12px 16px;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    #dimReadout {
-        margin-top: 0;
-        text-align: left;
-    }
-
-    .dim-stat {
-        font-size: 14px;
-    }
-
-    .system-meta {
-        font-size: 9px;
-    }
-}
-
-@media (max-width: 480px) {
-    #consoleHeader {
-        gap: 8px;
-    }
-    
-    .system-actions {
-        gap: 8px;
-    }
-
-    .action-btn {
-        padding: 10px 8px; /* Larger touch target for mobile */
-    }
-
-    .system-title {
-        display: none; /* Hide long title on small phones to save space */
-    }
 }

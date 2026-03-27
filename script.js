@@ -15,17 +15,6 @@
 (function () {
     'use strict';
 
-    // ---- Boot Log (populates the console UI panel) ----
-    const bootLogArea = document.getElementById('bootLog');
-    function logBoot(text, cls) {
-        if (!bootLogArea) return;
-        const span = document.createElement('span');
-        span.className = cls || '';
-        span.textContent = text + '\n';
-        bootLogArea.appendChild(span);
-        bootLogArea.scrollTop = bootLogArea.scrollHeight;
-    }
-
     // ---- Config ----
     const CSV_PATH = 'literature-clock-hardware/litclock_annotated.csv';
     const UPDATE_INTERVAL_MS = 30000;
@@ -208,11 +197,8 @@
     function resizeCanvas() {
         const dpr = window.devicePixelRatio || 1;
 
-        // Reserve space for the fixed console panel at the bottom (~185px)
-        // and annotation areas so the grid is fully visible.
-        const CONSOLE_H = 185;
         const availW = window.innerWidth  - ANNO_L - ANNO_R;
-        const availH = window.innerHeight - CONSOLE_H - ANNO_T - ANNO_B;
+        const availH = window.innerHeight - ANNO_T - ANNO_B;
 
         // ledSize constrained by both width and height so the whole grid is visible.
         const ledSize = Math.max(1, Math.min(
@@ -232,9 +218,6 @@
         canvas.height = canvasH * dpr;
         canvas.style.width  = canvasW + 'px';
         canvas.style.height = canvasH + 'px';
-
-        // Let CSS handle centering; no JS margin tricks.
-        canvas.style.margin = '20px auto';
 
         ctx.scale(dpr, dpr);
         paintDiscs();
@@ -549,17 +532,6 @@
         ctx.restore();
     }
 
-    function updateDimReadout() {
-        const w = document.getElementById('dimWidth');
-        const h = document.getElementById('dimHeight');
-        const l = document.getElementById('dimLEDs');
-        const d = document.getElementById('dimDerived');
-        if (w) w.textContent = (GRID_W * DISC_PITCH_MM).toFixed(0);
-        if (h) h.textContent = (GRID_H * DISC_PITCH_MM).toFixed(0);
-        if (l) l.textContent = (GRID_W * GRID_H).toLocaleString();
-        if (d) d.textContent = COLS_CHARS + ' chars/line · ' + QUOTE_LINES + ' quote lines';
-    }
-
     // ==================================================================
     // Animation System
     // ==================================================================
@@ -677,7 +649,6 @@
             quotesLoaded = true;
             updateDisplay(true);
         } catch (err) {
-            logBoot('Error loading quote data. Serve via HTTP, not file://.', 'log-warn');
             clearBuffer(targetBuffer);
             renderFixedLine_buf(targetBuffer, 'ERROR LOADING CSV', 0, [255, 0, 0], 'left');
             renderFixedLine_buf(targetBuffer, 'LITERATURE CLOCK', BRAND_Y, COLOR_BRAND, 'right');
@@ -788,35 +759,18 @@
     });
 
     // ---- Init ----
-    let powerOn = true;
-    let bootActive = false;
-    let updateTimer = null;
-
     window.addEventListener('resize', () => {
         resizeCanvas();
-        if (powerOn && quotesLoaded && quotesMap[currentTimeKey]) {
+        if (quotesLoaded && quotesMap[currentTimeKey]) {
             displayEntryInstant(quotesMap[currentTimeKey][currentEntryIndex % quotesMap[currentTimeKey].length]);
-        } else if (!powerOn) {
-            paintDiscs(); // repaint off state
         }
     });
 
-    rebuildBuffers(); // Ensure arrays are sized to final GRID_W/H
+    rebuildBuffers();
     resizeCanvas();
-    updateDimReadout();
-    
-    clearBuffer(targetBuffer);
-    renderFixedLine_buf(targetBuffer, 'LOADING SYSTEM...', 0, COLOR_BLUE, 'left');
-    renderFixedLine_buf(targetBuffer, 'LITERATURE CLOCK', BRAND_Y, COLOR_BRAND, 'right');
-    snapToTarget();
 
     loadCSV().then(() => {
-        logBoot('System Core // Literature Clock Online', 'log-ok');
-        logBoot('Ready!', 'log-brand');
-        
-        updateTimer = setInterval(() => updateDisplay(false), UPDATE_INTERVAL_MS);
-        
-        // Final layout settle
+        setInterval(() => updateDisplay(false), UPDATE_INTERVAL_MS);
         requestAnimationFrame(() => {
             resizeCanvas();
             if (quotesLoaded && quotesMap[currentTimeKey]) {
@@ -824,74 +778,5 @@
             }
         });
     });
-
-    // ==================================================================
-    // System Controls (Hacker Console)
-    // ==================================================================
-    window.togglePower = function () {
-        if (bootActive) return;
-        if (powerOn) {
-            powerOn = false;
-            if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
-            animating = false;
-            if (updateTimer) { clearInterval(updateTimer); updateTimer = null; }
-            currentTimeKey = '';
-            clearBuffer(targetBuffer);
-            snapToTarget();
-            btnPower.textContent = '⏻ POWER ON';
-            btnPower.classList.add('power-off');
-            btnReboot.disabled = true;
-            logBoot('[SYSTEM_HALT] Power Disconnected', 'log-warn');
-        } else {
-            runBootSequence();
-        }
-    };
-
-    window.rebootSequence = function () {
-        if (bootActive) return;
-        powerOn = false;
-        if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
-        animating = false;
-        if (updateTimer) { clearInterval(updateTimer); updateTimer = null; }
-        currentTimeKey = '';
-        clearBuffer(targetBuffer);
-        snapToTarget();
-        logBoot('[REBOOTING]', 'log-warn');
-        setTimeout(() => runBootSequence(), 600);
-    };
-
-    async function runBootSequence() {
-        bootActive = true;
-        powerOn = true;
-        btnPower.textContent = '⏻ BOOTING...';
-        btnPower.classList.remove('power-off');
-        btnPower.disabled = true;
-        btnReboot.disabled = true;
-
-        const wait = (ms) => new Promise(r => setTimeout(r, ms));
-        logBoot('Initializing System Core...', 'log-info');
-        await wait(800);
-        
-        logBoot('Allocating 53,098 Disc Buffers...', 'log-info');
-        rebuildBuffers();
-        resizeCanvas();
-        await wait(600);
-        
-        logBoot('Connecting to Neural Quote Mesh...', 'log-info');
-        await loadCSV();
-        
-        logBoot('Status: ONLINE', 'log-ok');
-        logBoot('Ready!', 'log-brand');
-        
-        btnPower.textContent = '⏻ SYSTEM_OFF';
-        btnPower.disabled = false;
-        btnReboot.disabled = false;
-        bootActive = false;
-        
-        updateTimer = setInterval(() => updateDisplay(false), UPDATE_INTERVAL_MS);
-    }
-
-    const btnPower = document.getElementById('btnPower');
-    const btnReboot = document.getElementById('btnReboot');
 
 })();

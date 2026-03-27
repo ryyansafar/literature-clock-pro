@@ -10,40 +10,6 @@
 
 <body>
     <canvas id="ledMatrix"></canvas>
-
-    <!-- System Interface: Cinematic Hacker Console -->
-    <div id="systemInterface">
-        <div id="consoleHeader">
-            <div class="status-indicator"></div>
-            <span class="system-title">SYSTEM_CORE // LITERATURE_CLOCK_V2</span>
-            <div class="system-actions">
-                <button id="btnPower" class="action-btn power" onclick="window.togglePower()">
-                    <span class="btn-icon">⏻</span> SYSTEM_OFF
-                </button>
-                <button id="btnReboot" class="action-btn reboot" onclick="window.rebootSequence()" disabled>
-                    <span class="btn-icon">↻</span> REBOOT_CLK
-                </button>
-            </div>
-        </div>
-        
-        <div id="consoleBody">
-            <div class="log-container">
-                <div id="bootLog"></div>
-            </div>
-            
-            <div class="controls-panel">
-                <div id="dimReadout">
-                    <div id="dimLEDs" class="dim-stat">53,098</div>
-                    <div class="dim-label">DISCS_ACTIVE</div>
-                </div>
-                <div class="system-meta">
-                    <div class="meta-row"><span>STATUS</span> <span class="log-ok">ONLINE</span></div>
-                    <div class="meta-row"><span>MODE</span> <span class="log-info">OPTIMIZED</span></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="script.js"></script>
 </body>
 
