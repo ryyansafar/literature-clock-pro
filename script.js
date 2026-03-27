@@ -758,25 +758,117 @@
         if (e.key === ' ' || e.key === 'ArrowRight') { e.preventDefault(); cycleQuote(); }
     });
 
+    // ==================================================================
+    // Power + Boot Sequence
+    // ==================================================================
+
+    let powerOn = false;
+    let booting = false;
+    const btnPower = document.getElementById('btnPower');
+
+    /** Render a list of [text, lineIndex, color] onto the disc grid and snap. */
+    function showBootScreen(lines) {
+        clearBuffer(targetBuffer);
+        for (const [text, lineY, color] of lines) {
+            renderFixedLine_buf(targetBuffer, text, lineY * CELL_H, color, 'left');
+        }
+        snapToTarget();
+    }
+
+    async function runBootSequence() {
+        if (booting) return;
+        booting = true;
+        powerOn = true;
+        btnPower.classList.add('on');
+
+        const wait = ms => new Promise(r => setTimeout(r, ms));
+        const alreadyLoaded = quotesLoaded;
+
+        // Step 1 — identify
+        showBootScreen([
+            ['LITERATURE CLOCK', 0, COLOR_BLUE],
+        ]);
+        await wait(500);
+
+        // Step 2 — WiFi
+        showBootScreen([
+            ['LITERATURE CLOCK', 0, COLOR_BLUE],
+            ['WIFI CONNECTING...', 2, COLOR_DIM],
+        ]);
+        await wait(700);
+
+        showBootScreen([
+            ['LITERATURE CLOCK', 0, COLOR_BLUE],
+            ['WIFI OK', 2, COLOR_WHITE],
+            ['NTP SYNC OK', 3, COLOR_WHITE],
+        ]);
+        await wait(400);
+
+        // Step 3 — load quotes (real fetch or instant if already cached)
+        showBootScreen([
+            ['LITERATURE CLOCK', 0, COLOR_BLUE],
+            ['WIFI OK', 2, COLOR_WHITE],
+            ['NTP SYNC OK', 3, COLOR_WHITE],
+            ['LOADING QUOTES...', 5, COLOR_DIM],
+        ]);
+
+        if (!alreadyLoaded) {
+            await loadCSV();
+        } else {
+            await wait(350);
+        }
+
+        // Step 4 — ready
+        const count = Object.keys(quotesMap).length;
+        showBootScreen([
+            ['LITERATURE CLOCK', 0, COLOR_BLUE],
+            ['WIFI OK', 2, COLOR_WHITE],
+            ['NTP SYNC OK', 3, COLOR_WHITE],
+            [count + ' QUOTES LOADED', 5, COLOR_WHITE],
+            ['READY', 7, COLOR_BLUE],
+        ]);
+        await wait(900);
+
+        booting = false;
+        setInterval(() => updateDisplay(false), UPDATE_INTERVAL_MS);
+        requestAnimationFrame(() => {
+            resizeCanvas();
+            if (quotesLoaded && quotesMap[currentTimeKey]) {
+                displayEntryAnimated(quotesMap[currentTimeKey][currentEntryIndex % quotesMap[currentTimeKey].length]);
+            }
+        });
+    }
+
+    window.togglePower = function () {
+        if (booting) return;
+        if (powerOn) {
+            powerOn = false;
+            if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+            animating = false;
+            currentTimeKey = '';
+            showBootScreen([
+                ['SHUTTING DOWN', 0, COLOR_DIM],
+            ]);
+            setTimeout(() => {
+                clearBuffer(targetBuffer);
+                snapToTarget();
+                btnPower.classList.remove('on');
+            }, 600);
+        } else {
+            runBootSequence();
+        }
+    };
+
     // ---- Init ----
     window.addEventListener('resize', () => {
         resizeCanvas();
-        if (quotesLoaded && quotesMap[currentTimeKey]) {
+        if (powerOn && !booting && quotesLoaded && quotesMap[currentTimeKey]) {
             displayEntryInstant(quotesMap[currentTimeKey][currentEntryIndex % quotesMap[currentTimeKey].length]);
         }
     });
 
     rebuildBuffers();
     resizeCanvas();
-
-    loadCSV().then(() => {
-        setInterval(() => updateDisplay(false), UPDATE_INTERVAL_MS);
-        requestAnimationFrame(() => {
-            resizeCanvas();
-            if (quotesLoaded && quotesMap[currentTimeKey]) {
-                displayEntryInstant(quotesMap[currentTimeKey][currentEntryIndex % quotesMap[currentTimeKey].length]);
-            }
-        });
-    });
+    runBootSequence();
 
 })();

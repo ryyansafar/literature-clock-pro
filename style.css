@@ -31,3 +31,36 @@ body::before {
 canvas {
     display: block;
 }
+
+#btnPower {
+    position: fixed;
+    bottom: 18px;
+    right: 20px;
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.3);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 18px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.25s, border-color 0.25s;
+    padding: 0;
+}
+
+#btnPower:hover {
+    color: rgba(255, 255, 255, 0.75);
+    border-color: rgba(255, 255, 255, 0.45);
+}
+
+#btnPower.on {
+    color: rgba(80, 200, 120, 0.7);
+    border-color: rgba(80, 200, 120, 0.35);
+}
+
+#btnPower.on:hover {
+    color: rgba(80, 200, 120, 1);
+    border-color: rgba(80, 200, 120, 0.7);
+}
