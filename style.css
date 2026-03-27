@@ -32,6 +32,27 @@ canvas {
     display: block;
 }
 
+#credits {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.18);
+    line-height: 1.5;
+    pointer-events: auto;
+}
+
+#credits a {
+    color: rgba(255, 255, 255, 0.25);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+#credits a:hover {
+    color: rgba(255, 255, 255, 0.6);
+}
+
 #btnPower {
     position: fixed;
     bottom: 18px;

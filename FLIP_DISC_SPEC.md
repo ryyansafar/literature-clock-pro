@@ -1,5 +1,15 @@
 # Flip Disc Literature Clock — Hardware Specification
 
+## Why Flip Disc?
+
+The original concept for this company installation was an LED matrix — NeoPixel strips in a frame, individually addressable pixels. That approach was abandoned for three reasons:
+
+1. **Cost** — NeoPixel strips at wall scale are expensive. A 2m × 2m grid at 8mm pitch requires ~60,000 pixels across ~120 strips.
+2. **Power** — NeoPixel draws up to 60mA per pixel at full white. Even at 20% brightness a grid this size needs 15–20A of 5V supply, heavy gauge wiring, and thermal planning.
+3. **Aesthetics** — it would still just be a screen. Flip discs are mechanical. They make a sound. They hold their state without power. They look like something.
+
+---
+
 ## Display Technology: Flip Disc (Split-Flap Dot Matrix)
 
 Each "pixel" is a small electromagnetic disc that flips between a **white** face (on) and a **dark** face (off). The blue-highlighted time segment uses a second colour face. No power is needed to hold state — discs stay flipped until actively changed.
